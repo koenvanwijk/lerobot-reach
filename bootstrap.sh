@@ -18,6 +18,7 @@ repos=(
   "https://github.com/koenvanwijk/lerobot-action-space"
   "https://github.com/koenvanwijk/lerobot-remote"
   "https://github.com/koenvanwijk/lerobot-matchmaker"
+  "https://github.com/koenvanwijk/lerobot-robot-rerun"
 )
 
 for repo in "${repos[@]}"; do
