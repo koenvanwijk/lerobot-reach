@@ -10,6 +10,16 @@ lerobot-remote/         ← pip: lerobot-remote
 lerobot-matchmaker/     ← pip: lerobot-matchmaker
 ```
 
+## New machine setup
+
+```bash
+git clone https://github.com/koenvanwijk/lerobot-reach
+cd lerobot-reach
+bash bootstrap.sh   # clones lerobot-action-space, lerobot-remote, lerobot-matchmaker as siblings
+```
+
+Then open Claude Code from the `lerobot-reach/` directory to get full cross-repo context.
+
 ## Cross-repo reading
 
 Claude Code can read files in sibling repos directly:
