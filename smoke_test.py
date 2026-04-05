@@ -83,8 +83,8 @@ def test_rerun_robot():
     from lerobot_robot_rerun.config import RerunRobotConfig
     from lerobot_robot_rerun.robot import RerunRobot
 
-    # Use Roarm URDF (mesh-free kinematics variant)
-    urdf_path = "/home/kwijk/roarm/urdf/roarm_m3_kinematics.urdf"
+    # Use SO101 URDF
+    urdf_path = "lerobot-robot-rerun/urdf/so101/so101.urdf"
 
     config = RerunRobotConfig(
         urdf_path=urdf_path,
