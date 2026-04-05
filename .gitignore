@@ -1,0 +1,15 @@
+# Sub-repos — managed independently
+lerobot-action-space/
+lerobot-remote/
+lerobot-matchmaker/
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+dist/
+*.egg-info/
+
+# IDE
+.vscode/
+.idea/
