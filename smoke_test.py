@@ -163,22 +163,34 @@ if __name__ == "__main__":
         sys.path.insert(0, 'lerobot-robot-rerun/src')
         from lerobot_robot_rerun.config import RerunRobotConfig
         from lerobot_robot_rerun.robot import RerunRobot
+        import yourdfpy
 
+        urdf_path = "lerobot-robot-rerun/urdf/so101/so101.urdf"
         robot = RerunRobot(RerunRobotConfig(
-            urdf_path="lerobot-robot-rerun/urdf/so101/so101.urdf",
+            urdf_path=urdf_path,
             spawn_viewer=True,
         ))
         robot.connect()
+
+        # Read joint limits from URDF so the sinus stays in range
+        urdf = yourdfpy.URDF.load(urdf_path)
+        limits = {}
+        for j in urdf.robot.joints:
+            if j.type != "fixed" and j.limit:
+                limits[j.name] = (j.limit.lower, j.limit.upper)
+
         print(f"Rerun viewer open — animating joints: {robot._joint_names}")
         print("Ctrl+C to stop.")
         try:
             i = 0
             while True:
-                t = i / 50
-                action = {
-                    f"{j}.pos": math.sin(t + k * 0.5) * 50
-                    for k, j in enumerate(robot._joint_names)
-                }
+                t = i / 50.0
+                action = {}
+                for k, j in enumerate(robot._joint_names):
+                    lo, hi = limits.get(j, (-1.0, 1.0))
+                    mid = (hi + lo) / 2
+                    amp = (hi - lo) / 2 * 0.8  # 80% of range
+                    action[f"{j}.pos"] = mid + amp * math.sin(t + k * 0.7)
                 robot.send_action(action)
                 time.sleep(0.02)
                 i += 1
