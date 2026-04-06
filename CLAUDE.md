@@ -12,6 +12,14 @@ lerobot-matchmaker/     ← pip: lerobot-matchmaker
 
 ## New machine setup
 
+**See [SETUP.md](SETUP.md) for complete installation instructions** including:
+- Udev rules setup (USB serial device aliasing)
+- Python environment configuration (Miniconda + dependencies)
+- Calibration file setup for SO101 robots
+- Running lerobot-teleoperate with all three components
+
+**Quick clone:**
+
 ```bash
 git clone https://github.com/koenvanwijk/lerobot-reach
 cd lerobot-reach
