@@ -20,6 +20,25 @@ bash bootstrap.sh   # clones lerobot-action-space, lerobot-remote, lerobot-match
 
 Then open Claude Code from the `lerobot-reach/` directory to get full cross-repo context.
 
+## Finding robot arm ports
+
+Use these commands to rediscover connected arm serial devices:
+
+```bash
+# Quick list of likely serial devices
+ls -1 /dev/tty_* /dev/ttyACM* /dev/ttyUSB* 2>/dev/null
+
+# With USB metadata (model/serial)
+for d in /dev/tty_* /dev/ttyACM* /dev/ttyUSB*; do
+        [ -e "$d" ] || continue
+        echo "=== $d ==="
+        udevadm info -q property -n "$d" | grep -E 'ID_MODEL=|ID_SERIAL=|ID_VENDOR=|DEVNAME='
+done
+
+# LeRobot helper
+lerobot-find-port
+```
+
 ## Cross-repo reading
 
 Claude Code can read files in sibling repos directly:
@@ -30,6 +49,33 @@ Claude Code can read files in sibling repos directly:
 ../lerobot-remote/src/lerobot_remote_transport/
 ../lerobot-matchmaker/src/lerobot_matchmaker/
 ```
+
+## Packaging note (lerobot-remote)
+
+`lerobot-remote` currently uses a **single `src/` package layout** (no split into
+`transport/`, `robot/`, `teleop/` sub-packages).
+
+- Distribution name is `lerobot_robot_remote` for LeRobot plugin discovery.
+- `lerobot_robot_remote.__init__` imports `lerobot_teleoperator_remote` so both
+        plugin types are registered (`remote_robot` and `remote_teleop`) in one install.
+- Keep `pyproject.toml`, `pytest.ini`, and test import paths aligned to `src/`.
+
+## How LeRobot finds configs/classes
+
+LeRobot discovers third-party plugins via `register_third_party_plugins()`:
+
+- It scans installed distributions with names starting with `lerobot_robot_`,
+        `lerobot_teleoperator_`, `lerobot_camera_`, `lerobot_policy_`.
+- Matching distributions are imported (via `importlib.import_module`).
+- Import side-effects run decorators such as:
+        - `@RobotConfig.register_subclass("remote_robot")`
+        - `@TeleoperatorConfig.register_subclass("remote_teleop")`
+- After that, CLI flags like `--robot.type=remote_robot` and
+        `--teleop.type=remote_teleop` resolve to those config/classes.
+
+For this repo (single-package layout), `lerobot_robot_remote` is the discovered
+distribution and it imports `lerobot_teleoperator_remote` so both plugin types
+are registered in one install.
 
 ## Dependency graph
 
