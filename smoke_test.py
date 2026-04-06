@@ -162,36 +162,30 @@ if __name__ == "__main__":
         import math, time
         sys.path.insert(0, 'lerobot-robot-rerun/src')
         from lerobot_robot_rerun.config import RerunRobotConfig
-        from lerobot_robot_rerun.robot import RerunRobot
-        import yourdfpy
+        from lerobot_robot_rerun.robot import RerunRobot, RERUN_ROBOT_MODES
+        from lerobot_action_space import ActionBridge, TELEOP_ACTION_MODES
 
         urdf_path = "lerobot-robot-rerun/urdf/so101/so101.urdf"
-        robot = RerunRobot(RerunRobotConfig(
-            urdf_path=urdf_path,
-            spawn_viewer=True,
-        ))
+        robot = RerunRobot(RerunRobotConfig(urdf_path=urdf_path, spawn_viewer=True))
         robot.connect()
 
-        # Read joint limits from URDF so the sinus stays in range
-        urdf = yourdfpy.URDF.load(urdf_path)
-        limits = {}
-        for j in urdf.robot.joints:
-            if j.type != "fixed" and j.limit:
-                limits[j.name] = (j.limit.lower, j.limit.upper)
+        # Bridge: teleop normalized → robot normalized (EXACT, robot maps to rad internally)
+        bridge = ActionBridge.auto(TELEOP_ACTION_MODES, RERUN_ROBOT_MODES)
+        print(f"Bridge: {bridge.teleop_mode.name} → {bridge.robot_mode.name}  [{bridge.quality}]")
 
-        print(f"Rerun viewer open — animating joints: {robot._joint_names}")
-        print("Ctrl+C to stop.")
+        print(f"\nRerun viewer open — joints: {robot._joint_names}")
+        print("Teleop sends normalized, robot maps to rad via URDF limits. Ctrl+C to stop.")
         try:
             i = 0
             while True:
                 t = i / 50.0
-                action = {}
-                for k, j in enumerate(robot._joint_names):
-                    lo, hi = limits.get(j, (-1.0, 1.0))
-                    mid = (hi + lo) / 2
-                    amp = (hi - lo) / 2 * 0.8  # 80% of range
-                    action[f"{j}.pos"] = mid + amp * math.sin(t + k * 0.7)
-                robot.send_action(action)
+                # Animate in normalized [-100, +100] space
+                teleop_action = {
+                    f"{j}.pos": math.sin(t + k * 0.7) * 80.0
+                    for k, j in enumerate(robot._joint_names)
+                }
+                robot_action = bridge.convert(teleop_action)
+                robot.send_action(robot_action)
                 time.sleep(0.02)
                 i += 1
         except KeyboardInterrupt:
