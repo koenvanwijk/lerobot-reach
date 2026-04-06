@@ -152,4 +152,83 @@ async def run():
 
 
 if __name__ == "__main__":
-    asyncio.run(run())
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--rerun-viewer", action="store_true",
+                        help="Open Rerun viewer and animate SO101 with a sine wave")
+    args = parser.parse_args()
+
+    if args.rerun_viewer:
+        import math, time
+        sys.path.insert(0, 'lerobot-robot-rerun/src')
+        from lerobot_robot_rerun.config import RerunRobotConfig
+        from lerobot_robot_rerun.robot import RerunRobot
+
+        robot = RerunRobot(RerunRobotConfig(
+            urdf_path="lerobot-robot-rerun/urdf/so101/so101.urdf",
+            spawn_viewer=True,
+        ))
+        robot.connect()
+        print(f"Rerun viewer open — animating joints: {robot._joint_names}")
+        print("Ctrl+C to stop.")
+        try:
+            i = 0
+            while True:
+                t = i / 50
+                action = {
+                    f"{j}.pos": math.sin(t + k * 0.5) * 50
+                    for k, j in enumerate(robot._joint_names)
+                }
+                robot.send_action(action)
+                time.sleep(0.02)
+                i += 1
+        except KeyboardInterrupt:
+            pass
+        finally:
+            robot.disconnect()
+    else:
+        asyncio.run(run())
+
+
+# ---------------------------------------------------------------------------
+# 5. Observation + key matching smoke test (no WebRTC — direct simulation)
+# ---------------------------------------------------------------------------
+
+def test_obs_and_key_matching():
+    import sys
+    sys.path.insert(0, 'lerobot-robot-rerun/src')
+    sys.path.insert(0, '/home/kwijk/localdata/lerobot_clean/lerobot/src')
+
+    from lerobot_robot_rerun.config import RerunRobotConfig
+    from lerobot_robot_rerun.robot import RerunRobot
+    from lerobot_remote_robot.remote_robot import RemoteRobot as _R  # just check filter
+
+    # Setup virtual robot
+    config = RerunRobotConfig(urdf_path="lerobot-robot-rerun/urdf/so101/so101.urdf", spawn_viewer=False)
+    vr = RerunRobot(config)
+    vr.connect()
+    joints = vr._joint_names  # ['gripper', 'wrist_roll', ...]
+
+    # Simulate: robot side sends features, operator side receives
+    features = list(vr.action_features.keys())
+    print(f"\n[key match] robot action_features: {features}")
+    assert all(k.endswith(".pos") for k in features), "expected .pos keys"
+    assert "shoulder_pan.pos" in features
+    assert "gripper.pos" in features
+    print(f"[key match] ✓ feature keys match SO101 joint names")
+
+    # Simulate obs roundtrip via __obs__ tag
+    import threading
+    from lerobot_robot_remote.remote_robot import RemoteRobot as RR
+    proxy = object.__new__(RR)
+    proxy._obs_lock = threading.Lock()
+    proxy._last_observation = {}
+
+    obs = vr.get_observation()
+    tagged = {"__obs__": True, **obs}
+    proxy._on_observation_received(tagged)
+    assert proxy._last_observation == obs
+    print(f"[key match] ✓ obs roundtrip: {list(obs.keys())[:3]}...")
+
+    vr.disconnect()
+    print(f"[key match] ✓ all key matching tests passed")
