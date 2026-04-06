@@ -9,7 +9,8 @@ Plug-and-play: any LeRobot teleop → any LeRobot robot, over the network, with 
 |------|------|---------|
 | [lerobot-action-space](https://github.com/koenvanwijk/lerobot-action-space) | Shared action space primitives — `ActionMode`, `ActionBridge`, `FrameDefinition` | `pip install git+https://github.com/koenvanwijk/lerobot-action-space` |
 | [lerobot-remote](https://github.com/koenvanwijk/lerobot-remote) | LeRobot Robot + Teleoperator plugins for WebRTC | `pip install git+https://github.com/koenvanwijk/lerobot-remote` |
-| [lerobot-matchmaker](https://github.com/koenvanwijk/lerobot-matchmaker) | WebRTC signaling server | `pip install git+https://github.com/koenvanwijk/lerobot-matchmaker` |
+| [lerobot-matchmaker](https://github.com/koenvanwijk/lerobot-matchmaker) | WebRTC signaling server (self-hosted or [Firebase cloud](https://europe-west1-lerobot-matchmaker.cloudfunctions.net/matchmaker)) | `pip install git+https://github.com/koenvanwijk/lerobot-matchmaker` |
+| [lerobot-robot-rerun](https://github.com/koenvanwijk/lerobot-robot-rerun) | Virtual robot: visualise joint states in Rerun viewer (URDF) | `pip install git+https://github.com/koenvanwijk/lerobot-robot-rerun` |
 
 ## Quick start
 
@@ -17,6 +18,10 @@ Plug-and-play: any LeRobot teleop → any LeRobot robot, over the network, with 
 ```bash
 pip install git+https://github.com/koenvanwijk/lerobot-matchmaker
 lerobot-matchmaker --host 0.0.0.0 --port 8080
+```
+Or use the hosted instance (no setup needed):
+```
+https://europe-west1-lerobot-matchmaker.cloudfunctions.net/matchmaker
 ```
 
 **2. Robot side** — replace your local teleop with a remote one:
