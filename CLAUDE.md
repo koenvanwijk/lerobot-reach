@@ -80,7 +80,7 @@ Critical:
 
 High:
 - lerobot-remote #2: observation reverse channel not implemented
-- lerobot-remote #3: no STUN/TURN — fails across NAT
+- ~~lerobot-remote #3: no STUN/TURN — fails across NAT~~ (STUN added; TURN still missing for symmetric NAT)
 - lerobot-remote #4: lerobot import paths unverified
 - lerobot-remote #5: preferred_hz from ActionMode not used
 
