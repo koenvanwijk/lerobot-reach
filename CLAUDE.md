@@ -116,9 +116,15 @@ lerobot-matchmaker                                            │
 
 **RemoteRobot** (`lerobot-remote`) — LeRobot Robot plugin, operator side:
 `RemoteRobot(config, teleop_modes)` → `connect()` negotiates modes → `send_action()`
+`teleop_modes` is optional — defaults to `SO101_LEADER_MODES` if omitted.
 
 **RemoteTeleop** (`lerobot-remote`) — LeRobot Teleoperator plugin, robot side:
 `RemoteTeleop(config, robot_modes)` → `connect()` waits for operator → `get_action()`
+`robot_modes` is optional — defaults to `SO101_FOLLOWER_MODES` if omitted.
+
+> **ActionMode is not required to get started.** `RemoteRobot` and `RemoteTeleop` work
+> out-of-the-box for SO101 arms without any mode configuration. Declare custom modes only
+> when connecting devices with different units, frames, or command modes.
 
 **Matchmaker** (`lerobot-matchmaker`) — HTTP long-poll signaling:
 `POST /signal/{room}/{role}/send` · `GET /signal/{room}/{role}/recv`
