@@ -95,4 +95,14 @@ MY_ROBOT_MODES = [
 ]
 ```
 
-Pass to `RemoteTeleop(config, robot_modes=MY_ROBOT_MODES)`.
+Then use them wherever modes are needed:
+
+```python
+# With lerobot-remote (remote teleop):
+from lerobot_teleoperator_remote import RemoteTeleop, RemoteTeleopConfig
+teleop = RemoteTeleop(config, robot_modes=MY_ROBOT_MODES)
+
+# Or directly with ActionBridge for local use:
+bridge = ActionBridge.auto(teleop_modes=MY_TELEOP_MODES, robot_modes=MY_ROBOT_MODES)
+robot_action = bridge.convert(teleop_action)
+```
